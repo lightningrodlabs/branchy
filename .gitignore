@@ -1,0 +1,30 @@
+## editors
+/.idea
+/.vscode
+*.swp
+
+## system files
+.DS_Store
+
+target/
+node_modules/
+dist/
+.cargo/
+.hc*
+*.dna
+*.happ
+*.webhapp
+*.zip
+*.tsbuildinfo
+.running
+
+## temp folders
+/.tmp/
+
+# build
+/_site/
+/out-tsc/
+
+storybook-static
+.rollup.cache
+*.tsbuildinfo

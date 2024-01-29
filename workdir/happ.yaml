@@ -1,0 +1,17 @@
+---
+manifest_version: "1"
+name: branchy
+description: ~
+roles:
+  - name: branchy
+    provisioning:
+      strategy: create
+      deferred: false
+    dna:
+      bundled: "../dnas/branchy/workdir/branchy.dna"
+      modifiers:
+        network_seed: ~
+        properties: ~
+        origin_time: ~
+      version: ~
+      clone_limit: 0
