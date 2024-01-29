@@ -102,7 +102,15 @@ pub struct UnitOutput {
     pub record: Record,
 }
 
-///
+#[hdk_extern]
+fn get_unit(_hash: ActionHash) -> ExternResult<UnitOutput> {
+    let path = get_units_path();
+    let anchor_hash = path.path_entry_hash()?;
+    let units = get_units_inner(anchor_hash)?;
+    Ok(units[0].clone())
+}
+
+
 #[hdk_extern]
 fn get_units(_: ()) -> ExternResult<Vec<UnitOutput>> {
     let path = get_units_path();

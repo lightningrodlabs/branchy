@@ -78,6 +78,10 @@ test("branchy basic tests", async () => {
     assert.equal(node.name, unit1.name)
     assert.equal(encodeHashToBase64(node.units[0].hash),unit1Hash)
   
+    let unit = await alice_branchy.callZome({zome_name:'branchy', fn_name:'get_unit', payload: node.units[0].record.action.hash} );
+    assert.ok(unit)
+    console.log("UNIT", unit)
+
   })
 })
 
