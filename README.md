@@ -7,8 +7,9 @@ An attachments hierarchy app for organizing resources in We
 
 1. Install the holochain dev environment: https://developer.holochain.org/docs/install/
 2. Clone this repo: `git clone https://github.com/lightningrodlabs/branchy && cd ./branchy`
-3. Enter the nix shell: `nix-shell`
+3. Enter the nix shell: `nix develop`
 4. Install the dependencies with: `npm install`
+5. Copy a compatible version of [we](https://github.com/lightningrodlabs/we/releases) to `we_dev/we.AppImage`
 
 ## Building the DNA
 
@@ -26,10 +27,10 @@ npm run test
 
 ## UI
 
-To test out the UI:
+To test out the UI make sure you have first copied a version of [we](https://github.com/lightningrodlabs/we/releases) to `we_dev` :
 
 ``` bash
-npm run start
+npm run applet-dev
 ```
 
 ## Package
@@ -45,7 +46,7 @@ You'll have the `branchy.webhapp` in `workdir`, and it's component `branchy.happ
 ## License
 [![License: CAL 1.0](https://img.shields.io/badge/License-CAL%201.0-blue.svg)](https://github.com/holochain/cryptographic-autonomy-license)
 
-  Copyright (C) 2024, Lighning Rod Labs, based on code  Copyright (C) Holochain Foundation
+  Copyright (C) 2024, Lighning Rod Labs, based on [code](https://github.com/holochain/how) Copyright (C) Holochain Foundation
 
 This program is free software: you can redistribute it and/or modify it under the terms of the license
 provided in the LICENSE file (CAL-1.0).  This program is distributed in the hope that it will be useful,
