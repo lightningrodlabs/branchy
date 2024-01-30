@@ -33,7 +33,7 @@ export const appletServices: AppletServices = {
         
                 return {
                     icon_src: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"/></svg>`,
-                    name: units[unitHash].description,
+                    name: units[unitHash].name,
                 };
         }
     },
@@ -48,7 +48,7 @@ export const appletServices: AppletServices = {
         const units = await store.pullUnits()
         const lower = searchFilter.toLowerCase()
         return Object.entries(units)
-            .filter(([_h,unit]) => unit.description.toLowerCase().includes(lower))
+            .filter(([_h,unit]) => unit.name.toLowerCase().includes(lower))
             .map(([entryHashB4,unit]) =>{
             return { hrl: [dnaHash, decodeHashFromBase64(entryHashB4)], context: {} }
         })  

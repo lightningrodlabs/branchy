@@ -128,24 +128,27 @@ export class BranchyUnit extends ScopedElementsMixin(LitElement) {
 
     controlsHTML.push(html`
           <svg-button
+            .click=${() => this.reloadLinks()} 
+            .info=${"reload"}
+            .button=${"move"}>
+          </svg-button>
+          <svg-button
             .click=${() => this.addLink()} 
             .info=${"add link"}
             .button=${"link"}>
           </svg-button>
-        </div>
       `)
       
-    if ( (state == SysState.UnderConstruction || state == SysState.Alive) && isSteward) {
+    if ( (state == SysState.UnderConstruction || state == SysState.Alive) /*&& isSteward*/) {
       controlsHTML.push(html`
           <svg-button
             .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
             .info=${"add child"}
             .button=${"plus"}>
           </svg-button>
-        </div>
       `)
       if (state == SysState.UnderConstruction  && isSteward) {
-        if (path != "") {
+        if (false/*path != ""*/) {
           controlsHTML.push(html`
           <svg-button
             .click=${() => this.dispatchEvent(new CustomEvent('edit', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
@@ -173,7 +176,7 @@ export class BranchyUnit extends ScopedElementsMixin(LitElement) {
     } else if (state == SysState.Defunct) {
       stateHTML = html`<info-item item="Defunct"></info-item >`
     } else {
-      stateHTML = html`<div class="info-item">${"CUR STATE"}<div class="info-item-name">state: ${state}</div></div>`
+      //stateHTML = html`<div class="info-item">${"CUR STATE"}<div class="info-item-name">state: ${state}</div></div>`
     }
     const stateName = unitInfo.state
 

@@ -78,6 +78,7 @@ export class BranchyUnitDialog extends ScopedElementsMixin(LitElement) {
     let isValid = this._nameField.validity.valid
     if (!this._nameField.validity.valid) {
       this._nameField.reportValidity()
+      return
     }
     if (!this._descriptionField.validity.valid) {
       this._descriptionField.reportValidity()
@@ -162,8 +163,7 @@ export class BranchyUnitDialog extends ScopedElementsMixin(LitElement) {
   clear-on-select
   style="margin-bottom: 16px;"
   include-myself></search-agent>
-
-  <mwc-button id="primary-action-button" slot="primaryAction" @click=${this.handleOk}>ok</mwc-button>
+  <mwc-button id="primary-action-button" slot="primaryAction" @click=${this.handleOk} .disabled=${!this._nameField || !this._nameField.value}>ok</mwc-button>
   <mwc-button slot="secondaryAction"  dialogAction="cancel">cancel</mwc-button>
 </mwc-dialog>
 `
