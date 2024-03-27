@@ -11,6 +11,7 @@
   "dependencies": {
     "@holochain/client": "0.16",
     "@holochain-open-dev/utils": "^0.16.0",
+    "@holochain-open-dev/stores": "0.8.10",
     "@msgpack/msgpack": "^2.7.2",
     "esm": "^3.2.25",
     "js-base64": "^3.6.1",

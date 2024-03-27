@@ -8,16 +8,18 @@ import {
   import { sharedStyles } from "@holochain-open-dev/elements";
   import { branchyContext} from "../types";
   import { BranchyStore} from "../branchy.store";
-  import { HrlWithContext } from "@lightningrodlabs/we-applet";
+  import { WAL } from "@lightningrodlabs/we-applet";
   import { decodeHashFromBase64, EntryHashB64 } from "@holochain/client";
   import "@shoelace-style/shoelace/dist/components/button/button.js";
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
   import {until} from 'lit-html/directives/until.js';
-import { SVG } from "./svg-icons";
+  import { SVG } from "./svg-icons";
   
-  @localized()
   @customElement("attachments-list")
   export class AttachmentsList extends LitElement {
+    constructor() {
+      super();
+    }
     @property()
     unitHash!:EntryHashB64;
 
@@ -33,24 +35,24 @@ import { SVG } from "./svg-icons";
           this._store.unitAttachments.get(decodeHashFromBase64(this.unitHash)),
       );
 
-    async removeAttachment(attachment: HrlWithContext) {
+    async removeAttachment(attachment: WAL) {
         await this._store.removeAttachment(this.unitHash, attachment)
         this.dispatchEvent(new CustomEvent('attachment-removed', { detail: attachment, bubbles: true, composed: true }));
     }
   
-    renderAttachment(attachment: HrlWithContext) {
+    renderAttachment(attachment: WAL) {
       return html`
         <div class="attachment">
-        ${until(this._store.weClient!.attachableInfo(attachment).then(attachable => 
+        ${until(this._store.weClient!.assetInfo(attachment).then(attachable => 
             !attachable ? html`(?)` :
             html`
             <sl-button  size="small"
                 @click=${(e:any)=>{
                 e.stopPropagation()
-                this._store.weClient!.openHrl(attachment)
+                this._store.weClient!.openWal(attachment)
                 }}
-                style="display:flex;flex-direction:row;margin-right:5px"><sl-icon src=${attachable!.attachableInfo.icon_src} slot="prefix"></sl-icon>
-                ${attachable!.attachableInfo.name}
+                style="display:flex;flex-direction:row;margin-right:5px"><sl-icon src=${attachable!.assetInfo.icon_src} slot="prefix"></sl-icon>
+                ${attachable!.assetInfo.name}
             </sl-button> 
             ${this.allowDelete ? html `
             <sl-button style="display:flex;align-items:center;" size="small" circle
@@ -103,7 +105,7 @@ import { SVG } from "./svg-icons";
       }
     }
   
-    static styles = [
+    get styles() {return [
       sharedStyles,
       css`
         .attachments-list {
@@ -123,6 +125,6 @@ import { SVG } from "./svg-icons";
           display: flex;
         }
       `,
-    ];
+    ]}
   }
   

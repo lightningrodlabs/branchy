@@ -1,7 +1,7 @@
 import { AppAgentClient, EntryHashB64, AgentPubKeyB64, AppAgentCallZomeRequest, RoleName, encodeHashToBase64, decodeHashFromBase64, EntryHash } from '@holochain/client';
 import { UnitInput, RustNode, RustTree, Initialization, AdvanceStateInput, UnitOutput, BranchySignal, Unit, UpdateUnitInput, AddAttachmentInput} from './types';
 import { ActionHash  } from '@holochain/client';
-import { HrlB64WithContext } from '@lightningrodlabs/we-applet';
+import { WALUrl } from './util';
 
 export class BranchyService {
   constructor(
@@ -45,11 +45,10 @@ export class BranchyService {
   }
 
   async removeAttachment(input: AddAttachmentInput): Promise<undefined> {
-    console.log("REMVO", input )
     return this.callZome('remove_attachment', input);
   }
 
-  async getAttachments(input: EntryHash): Promise<Array<HrlB64WithContext>> {
+  async getAttachments(input: EntryHash): Promise<Array<WALUrl>> {
     return this.callZome('get_attachments', input);
   }
 

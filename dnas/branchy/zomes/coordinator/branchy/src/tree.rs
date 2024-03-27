@@ -1,5 +1,5 @@
 pub use hdk::prelude::*;
-pub use hdk::hash_path::path::TypedPath;
+pub use hdi::hash_path::path::TypedPath;
 use branchy_integrity::{TREE_ROOT, LinkTypes};
 
 use crate::{unit::convert_tag, BranchyError};
@@ -26,7 +26,8 @@ pub struct PathContent {
 
 fn get_entry_hashes(path: &Path) -> ExternResult<Vec<UnitInfo>> {
     let mut units = vec![];
-    let links = get_links(path.path_entry_hash()?, vec![LinkTypes::Unit], None)?;
+    let get_links_input = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::Unit)?.build();
+    let links = get_links(get_links_input)?;
     for l in links {
         let link_type = LinkTypes::try_from(ScopedLinkType {
             zome_index: l.zome_index,

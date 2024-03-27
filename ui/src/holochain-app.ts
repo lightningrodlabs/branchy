@@ -28,7 +28,7 @@ import {branchyContext} from "./types"
 import { localized, msg } from '@lit/localize';
 
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
-import { WeClient, isWeContext, initializeHotReload, HrlWithContext, Hrl } from '@lightningrodlabs/we-applet';
+import { WeClient, isWeContext, initializeHotReload, WAL, Hrl } from '@lightningrodlabs/we-applet';
 import { appletServices } from './we';
 import { BranchyUnit } from './elements/branchy-unit';
 
@@ -58,7 +58,7 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
   _profilesStore!: ProfilesStore;
 
   renderType = RenderType.App
-  hrlWithContext: HrlWithContext| undefined
+  wal: WAL| undefined
 
   async firstUpdated() {
 
@@ -81,12 +81,12 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
       const url = appPort ? `ws://localhost:${appPort}` : 'ws://localhost';
 
       if (adminPort) {
-        const adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`))
+        const adminWebsocket = await AdminWebsocket.connect({url: new URL(`ws://localhost:${adminPort}`)})
         const x = await adminWebsocket.listApps({})
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
-      const appAgentClient = await AppAgentWebsocket.connect(new URL(url), appId)
+      const appAgentClient = await AppAgentWebsocket.connect(appId,{url: new URL(url)})
     
       this._branchyStore = new BranchyStore(undefined, appAgentClient, "branchy")
       
@@ -108,7 +108,7 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
                     throw new Error("Unknown applet-view block type:"+weClient.renderInfo.view.block);
                 }
                 break;
-              case "attachable":
+              case "asset":
                 switch (weClient.renderInfo.view.roleName) {
                   case "branchy":
                     switch (weClient.renderInfo.view.integrityZomeName) {
@@ -116,7 +116,7 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
                         switch (weClient.renderInfo.view.entryType) {
                           case "unitx":
                             this.renderType = RenderType.Unit
-                            this.hrlWithContext = weClient.renderInfo.view.hrlWithContext
+                            this.wal = weClient.renderInfo.view.wal
                             break;
                           default:
                             throw new Error("Unknown entry type:"+weClient.renderInfo.view.entryType);
@@ -170,8 +170,8 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
       <profile-prompt>
         ${this.renderType == RenderType.App ? html`
          <branchy-controller></branchy-controller>`:""}
-        ${this.renderType == RenderType.Unit && this.hrlWithContext ? html`
-         <branchy-unit .currentUnitEh=${encodeHashToBase64(this.hrlWithContext.hrl[1])}></branchy-unit>`:""}
+        ${this.renderType == RenderType.Unit && this.wal ? html`
+         <branchy-unit .currentUnitEh=${encodeHashToBase64(this.wal.hrl[1])}></branchy-unit>`:""}
       </profile-prompt>
                   <!-- <branchy-controller id="controller" dummy="{true}""></branchy-controller> -->
 

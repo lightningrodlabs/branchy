@@ -1,5 +1,5 @@
 use hdi::prelude::*;
-use hdk::hash_path::path::{Component, Path};
+use hdi::hash_path::path::{Component, Path};
 use std::collections::BTreeMap;
 use holo_hash::AgentPubKeyB64;
 
@@ -61,10 +61,10 @@ impl Unit {
     }
 }
 
-#[hdk_entry_defs]
+#[hdk_entry_types]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
-    #[entry_def(required_validations = 5)]
+    #[entry_type(required_validations = 5)]
     Unitx(Unit), 
 }
 

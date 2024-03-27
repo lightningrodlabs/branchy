@@ -16,8 +16,8 @@ import {
   Progress,
 } from './types';
 import { Action, ActionHash } from '@holochain/client';
-import { HrlB64WithContext, HrlWithContext, WeClient } from '@lightningrodlabs/we-applet';
-import { getMyDna, hrlB64WithContextToRaw, hrlWithContextToB64 } from './util';
+import { WAL, WeClient, weaveUrlFromWal, weaveUrlToWAL } from '@lightningrodlabs/we-applet';
+import { WALUrl, getMyDna } from './util';
 import { AsyncReadable, manualReloadStore } from '@holochain-open-dev/stores';
 import { lazyLoad } from '@holochain-open-dev/stores';
 
@@ -46,7 +46,7 @@ export class BranchyStore {
   public unitsInfo: Readable<Dictionary<UnitInfo>> = derived(this.unitsInfoStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public dnaHash: DnaHash|undefined
-  public unitAttachments: LazyHoloHashMap<EntryHash,AsyncReadable<Array<HrlWithContext>>& { reload: () => Promise<void> }> = new LazyHoloHashMap(
+  public unitAttachments: LazyHoloHashMap<EntryHash,AsyncReadable<Array<WAL>>& { reload: () => Promise<void> }> = new LazyHoloHashMap(
     unitHash => manualReloadStore(async () => this.getAttachments(encodeHashToBase64(unitHash)))    
   )
 
@@ -126,13 +126,13 @@ export class BranchyStore {
     return undefined
   }
 
-  async addAttachment(unitHash: EntryHashB64, attachment: HrlWithContext) : Promise<undefined> {
+  async addAttachment(unitHash: EntryHashB64, attachment: WAL) : Promise<undefined> {
     const unit = this.unit(unitHash)
     if (unit) {
   
         await this.service.addAttachment({
             unitHash: decodeHashFromBase64(unitHash),
-            attachment: hrlWithContextToB64(attachment)
+            attachment: weaveUrlFromWal(attachment)
             }
           );
         return undefined
@@ -140,13 +140,13 @@ export class BranchyStore {
     return undefined
   }
 
-  async removeAttachment(unitHash: EntryHashB64, attachment: HrlWithContext) : Promise<undefined> {
+  async removeAttachment(unitHash: EntryHashB64, attachment: WAL) : Promise<undefined> {
     const unit = this.unit(unitHash)
     if (unit) {
   
         await this.service.removeAttachment({
             unitHash: decodeHashFromBase64(unitHash),
-            attachment: hrlWithContextToB64(attachment)
+            attachment: weaveUrlFromWal(attachment)
             }
           );
         return undefined
@@ -154,10 +154,10 @@ export class BranchyStore {
     return undefined
   }
 
-  async getAttachments(unitHash: EntryHashB64) : Promise<Array<HrlWithContext>> {
-    const hrlB64s = await this.service.getAttachments(decodeHashFromBase64(unitHash))
-    const hrls = hrlB64s.map(h=>hrlB64WithContextToRaw(h))
-    return hrls
+  async getAttachments(unitHash: EntryHashB64) : Promise<Array<WAL>> {
+    const WALUrls = await this.service.getAttachments(decodeHashFromBase64(unitHash))
+    const wals = WALUrls.map(h=>weaveUrlToWAL(h))
+    return wals
   }
 
   buildTree(tree: Array<RustNode>, node: RustNode): Node {

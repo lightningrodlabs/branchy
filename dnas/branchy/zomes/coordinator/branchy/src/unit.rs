@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 pub use hdk::prelude::*;
-use holo_hash::EntryHashB64;
 use branchy_integrity::{Unit, EntryTypes, LinkTypes};
 
 use crate::error::*;
@@ -27,7 +26,9 @@ pub fn create_unit(input: UnitInput) -> ExternResult<UnitOutput> {
 pub fn delete_unit_links(hash: EntryHash, tree_paths: Vec<Path>)  -> ExternResult<()> {
     let path = get_units_path();
     let anchor_hash = path.path_entry_hash()?;
-    let links = get_links(anchor_hash, LinkTypes::Unit, None)?;
+    let input = GetLinksInputBuilder::try_new(anchor_hash, LinkTypes::Unit)?.build();
+    let links = get_links(input)?;
+
     let mut delete_link_input: Vec<DeleteLinkInput> = Vec::new();
     let any: AnyLinkableHash = hash.into();
     for l in links {
@@ -39,7 +40,10 @@ pub fn delete_unit_links(hash: EntryHash, tree_paths: Vec<Path>)  -> ExternResul
         }
     }
     for path in tree_paths {
-        let links = get_links(path.path_entry_hash()?, LinkTypes::Unit, None)?;
+        let input = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::Unit)?.build();
+        
+    
+        let links = get_links(input)?;
         for l in links {
             if l.target == any {
                 delete_link_input.push(DeleteLinkInput{
@@ -103,13 +107,17 @@ pub struct UnitOutput {
 }
 
 #[hdk_extern]
-fn get_unit(_hash: ActionHash) -> ExternResult<UnitOutput> {
-    let path = get_units_path();
-    let anchor_hash = path.path_entry_hash()?;
-    let units = get_units_inner(anchor_hash)?;
-    Ok(units[0].clone())
+fn get_unit(hash: EntryHash) -> ExternResult<Option<Record>> {
+    get(hash,GetOptions::default())
 }
 
+#[hdk_extern]
+fn get_unit_links(_: ()) -> ExternResult<Vec<Link>> {
+    let path = get_units_path();
+    let anchor_hash = path.path_entry_hash()?;
+    let input = GetLinksInputBuilder::try_new(anchor_hash, LinkTypes::Unit)?.build();
+    get_links(input)
+}
 
 #[hdk_extern]
 fn get_units(_: ()) -> ExternResult<Vec<UnitOutput>> {
@@ -131,14 +139,15 @@ pub fn convert_tag(tag: LinkTag) -> ExternResult<(String,String)> {
     Ok((state,flags))
 }
 
-pub fn convert_attachment_tag(tag: LinkTag) -> ExternResult<HrlB64WithContext> {
-    let attachment= HrlB64WithContext::try_from(SerializedBytes::from(UnsafeBytes::from(tag.into_inner())))
+pub fn convert_attachment_tag(tag: LinkTag) -> ExternResult<WALUrl> {
+    let attachment= Attachment::try_from(SerializedBytes::from(UnsafeBytes::from(tag.into_inner())))
         .map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert tag into attachment"))))?;
-    Ok(attachment)
+    Ok(attachment.wal_url)
 }
 
 fn get_units_inner(base: EntryHash) -> BranchyResult<Vec<UnitOutput>> {
-    let links = get_links(base, LinkTypes::Unit, None)?;
+    let input = GetLinksInputBuilder::try_new(base, LinkTypes::Unit)?.build();
+    let links = get_links(input)?;
 
     let mut unit_infos: HashMap<EntryHash,UnitInfo> = HashMap::new();
     for link in links.clone() {
@@ -196,27 +205,27 @@ pub fn advance_state(input: AdvanceStateInput) -> ExternResult<()> {
     return Ok(());
 }
 
-pub type HrlB64 = (String,String);
-
-#[derive(Clone, Serialize, Deserialize, Debug, SerializedBytes)]
-#[serde(rename_all = "camelCase")]
-pub struct HrlB64WithContext {
-    pub hrl: HrlB64,
-    pub context: Option<String>,
-}
+pub type WALUrl = String;
 
 #[derive(Clone, Serialize, Deserialize, Debug, SerializedBytes)]
 #[serde(rename_all = "camelCase")]
 pub struct AddAttachmentInput {
     pub unit_hash: EntryHash,
-    pub attachment: HrlB64WithContext
+    pub attachment: WALUrl
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, SerializedBytes)]
+pub struct Attachment {
+    pub wal_url: WALUrl,
 }
 #[hdk_extern]
 pub fn add_attachment(input: AddAttachmentInput) -> ExternResult<()> {
-    let serialized: SerializedBytes = input.attachment.clone().try_into().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert attachment to tag"))))?;
+    let attachment: Attachment = Attachment{wal_url: input.attachment.clone()};
+    let serialized: SerializedBytes = attachment.try_into().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert attachment to tag"))))?;
     let tag :LinkTag = LinkTag::new(serialized.bytes().clone());
-
-    let links = get_links(input.unit_hash.clone(), LinkTypes::Attachment, None)?;
+    
+    let get_links_input: GetLinksInput = GetLinksInputBuilder::try_new(input.unit_hash.clone(), LinkTypes::Attachment)?.build();
+    let links = get_links(get_links_input)?;
     let found = links.into_iter().find(|link| link.tag == tag);
     if !found.is_some() {
         create_link(input.unit_hash.clone(), input.unit_hash, LinkTypes::Attachment, tag)?;
@@ -226,10 +235,12 @@ pub fn add_attachment(input: AddAttachmentInput) -> ExternResult<()> {
 
 #[hdk_extern]
 pub fn remove_attachment(input: AddAttachmentInput) -> ExternResult<()> {
-    let serialized: SerializedBytes = input.attachment.clone().try_into().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert attachment to tag"))))?;
+    let attachment: Attachment = Attachment{wal_url: input.attachment.clone()};
+    let serialized: SerializedBytes = attachment.try_into().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert attachment to tag"))))?;
     let tag :LinkTag = LinkTag::new(serialized.bytes().clone());
 
-    let links = get_links(input.unit_hash.clone(), LinkTypes::Attachment, None)?;
+    let input = GetLinksInputBuilder::try_new(input.unit_hash.clone(), LinkTypes::Attachment)?.build();
+    let links = get_links(input)?;
     for link in links {
         if link.tag == tag {
             delete_link(link.create_link_hash)?;
@@ -239,9 +250,10 @@ pub fn remove_attachment(input: AddAttachmentInput) -> ExternResult<()> {
 }
 
 #[hdk_extern]
-pub fn get_attachments(unit_hash: EntryHash) -> ExternResult<Vec<HrlB64WithContext>> {
-    let links = get_links(unit_hash, LinkTypes::Attachment, None)?;
-    let mut attachments: Vec<HrlB64WithContext> = Vec::new();
+pub fn get_attachments(unit_hash: EntryHash) -> ExternResult<Vec<WALUrl>> {
+    let input = GetLinksInputBuilder::try_new(unit_hash, LinkTypes::Attachment)?.build();
+    let links = get_links(input)?;
+    let mut attachments: Vec<WALUrl> = Vec::new();
     for link in links {
         attachments.push(convert_attachment_tag(link.tag)?);
     }

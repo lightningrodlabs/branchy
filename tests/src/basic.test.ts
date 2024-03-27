@@ -1,6 +1,6 @@
-import { ActionHash, DnaSource, EntryHash, decodeHashFromBase64 } from "@holochain/client";
+import { ActionHash, AgentPubKeyB64, DnaSource, EntryHash, decodeHashFromBase64, Record } from "@holochain/client";
 import { pause, runScenario, Scenario  } from "@holochain/tryorama";
-import { RecordBag } from '@holochain-open-dev/utils';
+import { EntryRecord, RecordBag } from '@holochain-open-dev/utils';
 
 import { assert, test } from "vitest";
 
@@ -12,6 +12,15 @@ const happPath = path.join(__dirname, "../../workdir/branchy.happ")
 
 import * as _ from 'lodash'
 import { Base64 } from "js-base64";
+export type Dictionary<T> = { [key: string]: T };
+
+interface Unit  {
+  parents: Array<string>,
+  name: string,
+  description: string,
+  stewards: Array<AgentPubKeyB64>,
+  meta: Dictionary<string>,
+}
 
 function encodeHashToBase64(hash: Uint8Array): string {
   return `u${Base64.fromUint8Array(hash, true)}`;
@@ -78,9 +87,11 @@ test("branchy basic tests", async () => {
     assert.equal(node.name, unit1.name)
     assert.equal(encodeHashToBase64(node.units[0].hash),unit1Hash)
   
-    let unit = await alice_branchy.callZome({zome_name:'branchy', fn_name:'get_unit', payload: node.units[0].record.action.hash} );
-    assert.ok(unit)
-    console.log("UNIT", unit)
+    let unitRecord: Record = await alice_branchy.callZome({zome_name:'branchy', fn_name:'get_unit', payload: unit1Hash} );
+    assert.ok(unitRecord)
+    const unitN = new EntryRecord<Unit>(unitRecord)
+
+    console.log("UNIT", unitN.entry)
 
   })
 })

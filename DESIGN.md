@@ -1,3 +1,3 @@
 # Branchy
 
-A path higherarchy with links attached the tags of which are encoded HRLwithContext
+A path higherarchy with links attached the tags of which are encoded WAL

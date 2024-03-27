@@ -61,9 +61,9 @@ export class BranchyUnit extends ScopedElementsMixin(LitElement) {
   }
 
   async addLink() {
-    const hrl = await this._store.weClient?.userSelectHrl()
-    if (hrl) {
-      await this._store.addAttachment(this.currentUnitEh, hrl)
+    const wal = await this._store.weClient?.userSelectWal()
+    if (wal) {
+      await this._store.addAttachment(this.currentUnitEh, wal)
       this.reloadLinks()
     }
   }

@@ -8,16 +8,12 @@ opt-level = "z"
 members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 
 [workspace.dependencies]
-hdi = "0.3"
-hdk = "0.2"
+hdi = "0.4.0-beta-dev.32"
+hdk = "0.3.0-beta-dev.36"
 serde = "1"
 
+
 [workspace.dependencies.file_storage]
-path = "dnas/branchy/zomes/coordinator/file_storage"
-
-[workspace.dependencies.file_storage_integrity]
-path = "dnas/branchy/zomes/integrity/file_storage"
-
 [workspace.dependencies.branchy]
 path = "dnas/branchy/zomes/coordinator/branchy"
 

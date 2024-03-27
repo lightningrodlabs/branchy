@@ -3,7 +3,7 @@
 import { ActionHash, ActionHashed, EntryHash, Record, Timestamp, EntryHashB64, AgentPubKeyB64, encodeHashToBase64  } from "@holochain/client";
 import { createContext } from "@lit/context";
 import { BranchyStore } from "./branchy.store";
-import { HrlB64WithContext } from "@lightningrodlabs/we-applet";
+import { WALUrl } from "./util";
 
 export const branchyContext = createContext<BranchyStore>('branchy/service');
 
@@ -51,7 +51,7 @@ export interface AdvanceStateInput {
 
 export interface AddAttachmentInput {
   unitHash: EntryHash,
-  attachment: HrlB64WithContext
+  attachment: WALUrl
 }
 
 export type BranchySignal =
