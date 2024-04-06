@@ -45,8 +45,8 @@ export default defineConfig({
           joiningAgents: [2],
         },
         {
-          name: 'notebooks',
-          instanceName: 'notebooks',
+          name: 'kando',
+          instanceName: 'kando',
           registeringAgent: 1,
           joiningAgents: [2],
         },
@@ -82,16 +82,16 @@ export default defineConfig({
         },
       },
       {
-      name: 'notebooks',
-      subtitle: 'Collaborative note taking',
-      description: 'Real-time note-taking based on syn',
+      name: 'kando',
+      subtitle: 'KanBan Boards',
+      description: 'Real-time KanBan based on syn',
       icon: {
         type: 'https',
-        url: 'https://lightningrodlabs.org/projects/notebooks_logo.svg',
+        url: 'https://raw.githubusercontent.com/holochain-apps/kando/main/we_dev/kando_icon.png',
       },
       source: {
         type: 'https',
-        url: 'https://github.com/lightningrodlabs/notebooks/releases/download/v0.2.4/notebooks.webhapp',
+        url: 'https://github.com/holochain-apps/kando/releases/download/v0.9.5/kando.webhapp',
       },
     },
   ],

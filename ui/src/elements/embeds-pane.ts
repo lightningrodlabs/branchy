@@ -8,15 +8,16 @@ import {
   import { sharedStyles } from "@holochain-open-dev/elements";
   import { branchyContext} from "../types";
   import { BranchyStore} from "../branchy.store";
-  import { WAL } from "@lightningrodlabs/we-applet";
+  import { WAL, weaveUrlFromWal } from "@lightningrodlabs/we-applet";
   import { decodeHashFromBase64, EntryHashB64 } from "@holochain/client";
   import "@shoelace-style/shoelace/dist/components/button/button.js";
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
   import {until} from 'lit-html/directives/until.js';
   import { SVG } from "./svg-icons";
-  
-  @customElement("attachments-list")
-  export class AttachmentsList extends LitElement {
+  import '@lightningrodlabs/we-elements/dist/elements/wal-embed.js';
+
+  @customElement("embeds-pane")
+  export class EmbedsPane extends LitElement {
     constructor() {
       super();
     }
@@ -42,27 +43,19 @@ import {
   
     renderAttachment(attachment: WAL) {
       return html`
-        <div style="display:flex;">
+        <div class="embed">
         ${until(this._store.weClient!.assetInfo(attachment).then(attachable => 
             !attachable ? html`(?)` :
             html`
-            <sl-button  size="small"
+            <wal-embed
                 @click=${(e:any)=>{
-                e.stopPropagation()
-                this._store.weClient!.openWal(attachment)
+                  console.log(e)
+                  e.stopPropagation()
                 }}
-                style="display:flex;flex-direction:row;margin-right:5px"><sl-icon src=${attachable!.assetInfo.icon_src} slot="prefix"></sl-icon>
-                ${attachable!.assetInfo.name}
-            </sl-button> 
-            ${this.allowDelete ? html `
-            <sl-button style="display:flex;align-items:center;" size="small" circle
-                @click=${()=>{
-                    this.removeAttachment(attachment)
-                }}
-            >
-                <img  width=15 src=${`data:image/svg+xml;charset=utf-8,${SVG["trash"].replace("#","%23")}`} />
-            </sl-button>
-            `: html``}
+                style="margin-top: 20px;"
+                .src=${weaveUrlFromWal(attachment)}
+                  >
+              </wal-embed>
             `
             ),
             html`Loading...`,
@@ -74,7 +67,7 @@ import {
     render() {
       switch (this.attachments.value.status) {
         case "pending":
-          return html`<div class="attachments-list" >
+          return html`<div class="embeds-pane" >
             ${Array(3).map(
               () => html`<div class="attachment"><sl-skeleton effect="pulse" class="attachment"></sl-skeleton></div>`
             )}
@@ -82,16 +75,9 @@ import {
         case "complete":
           if (this.attachments.value.value.length === 0)
             return html`
-              <div
-                class="attachments-list"
-              >
-                <span class="placeholder" style="margin: 24px;"
-                  >${msg("No attachments yet")}</span
-                >
-              </div>
             `;
           return html`
-            <div class="attachments-list">
+            <div class="embeds-pane">
               ${
                 this.attachments.value.value
                 .map((a) => this.renderAttachment(a))}
@@ -108,15 +94,14 @@ import {
     get styles() {return [
       sharedStyles,
       css`
-        .attachments-list {
+        .embeds-pane {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
             padding: 10px;
-            background-color: red;
         }
-        .attachmentx {
-            display: inline-block;
+        .embed {
+            display: flex;
             align-items: center;
             cursor: pointer;
             border-radius: 5px;

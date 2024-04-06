@@ -19,6 +19,7 @@ import { consume } from '@lit/context';
 import { Profile, ProfilesStore, profilesStoreContext } from "@holochain-open-dev/profiles";
 import { underConstructionImage } from "../images";
 import "./attachments-list.js";
+import "./embeds-pane.js";
 
 /**
  * @element branchy-unit
@@ -203,6 +204,12 @@ export class BranchyUnit extends ScopedElementsMixin(LitElement) {
         <attachments-list
           @attachment-removed=${()=>this.reloadLinks()}
           unitHash=${this.currentUnitEh} ></attachments-list>
+          
+        <embeds-pane
+          @attachment-removed=${()=>this.reloadLinks()}
+          unitHash=${this.currentUnitEh}>
+        </embeds-pane>
+
       </div>
       <branchy-confirm @confirmed=${(e:any) => this.handleConfirmAdvance(e.detail)}></branchy-confirm>
     `;

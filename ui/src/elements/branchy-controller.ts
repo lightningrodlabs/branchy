@@ -97,6 +97,7 @@ export class BranchyController extends ScopedElementsMixin(LitElement) {
   @state()
   private initialized = false;
   private initializing = false;
+  private initialSync : number | undefined = undefined
 
 
   async createDummyProfile() {
@@ -158,7 +159,16 @@ export class BranchyController extends ScopedElementsMixin(LitElement) {
       await this.createDummyProfile()
     }
     this.subscribeProfile()
-    this.checkInit()
+    await this.checkInit();
+    if (!this.initialized) {
+      this.initialSync = setInterval(async ()=>{
+        if (!this.initialized) {
+          await this.checkInit();
+        } else {
+          clearInterval(this.initialSync)
+        }
+      }, 10000);
+    }
   }
  
   private _getFirst(units: Dictionary<Unit>): EntryHashB64 {
@@ -305,6 +315,7 @@ export class BranchyController extends ScopedElementsMixin(LitElement) {
   }
 
   async checkInit() {
+    console.log("checking...")
     let units = await this._store.pullUnits();
     await this._store.pullTree();
 
@@ -367,17 +378,18 @@ export class BranchyController extends ScopedElementsMixin(LitElement) {
           <div class="about-event"/>
             <img class="branchy-welcome" src=${aliveImage}
             @click=${()=>this.adminCheck()}>
-            <h3>Welcome to Branchy!</h3>
-            <p>Either your node hasn't synchronized yet with the network, or you are the first one here! 
+            <h3>Welcome to Branchy! (v0.1.0)</h3>
+            
             ${this.showInit ? html`
             <h3>Initialize with: </h3>
+            <p>
             <mwc-button
               id="primary-action-button"
               slot="primaryAction"
               @click=${()=>this.addInitialSimple()}
               >Default Tree</mwc-button
             > 
-            or<br />
+            or
             
             <mwc-button
               id="primary-action-button"
@@ -385,16 +397,9 @@ export class BranchyController extends ScopedElementsMixin(LitElement) {
               @click=${()=>this._fileInput.click()}
               >Import JSON File</mwc-button
             > 
-            
-            ` : html`
-            <mwc-button
-              id="primary-action-button"
-              slot="primaryAction"
-              @click=${()=>this.checkInit()}
-              >Reload</mwc-button
-            > 
-            `}
             </p>
+            ` : html`<p>Synchronizing... </p>`}
+            
           </div>
         </div>
       </div>

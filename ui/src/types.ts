@@ -38,7 +38,7 @@ export enum SysState {
   UnderConstruction = "_build"
 }
 
-export interface Mark {
+export type Mark = {
   markType: number,
   mark: String,
   author: AgentPubKeyB64,
@@ -49,9 +49,17 @@ export interface AdvanceStateInput {
   unitHash: EntryHash,
 }
 
-export interface AddAttachmentInput {
+export type Embed = {
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+}
+
+export type AddAttachmentInput = {
   unitHash: EntryHash,
-  attachment: WALUrl
+  attachment: WALUrl,
+  embed?: Embed,
 }
 
 export type BranchySignal =
