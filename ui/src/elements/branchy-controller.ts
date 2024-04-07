@@ -378,11 +378,11 @@ export class BranchyController extends ScopedElementsMixin(LitElement) {
           <div class="about-event"/>
             <img class="branchy-welcome" src=${aliveImage}
             @click=${()=>this.adminCheck()}>
-            <h3>Welcome to Branchy! (v0.1.0)</h3>
-            
-            ${this.showInit ? html`
-            <h3>Initialize with: </h3>
-            <p>
+            <h3>Welcome to Branchy! (v0.1.1)</h3>
+
+            <p> If you are the first person installing Branchy in your group, initialize this instance
+            with:
+            <span style="display:flex; margin-top:5px;">
             <mwc-button
               id="primary-action-button"
               slot="primaryAction"
@@ -390,16 +390,18 @@ export class BranchyController extends ScopedElementsMixin(LitElement) {
               >Default Tree</mwc-button
             > 
             or
-            
+
             <mwc-button
               id="primary-action-button"
               slot="primaryAction"
               @click=${()=>this._fileInput.click()}
               >Import JSON File</mwc-button
-            > 
+            > </span>
             </p>
-            ` : html`<p>Synchronizing... </p>`}
-            
+            <p style="">
+              Otherwise, <strong>please be patient and wait</strong> for data to syncronize.  
+              When it does this page will automatically refresh.
+            </p>
           </div>
         </div>
       </div>
